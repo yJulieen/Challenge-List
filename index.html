@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>🌒 Eclipse Challenge List</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background-image: url('images/planet-galaxy-hd-solar-wallpaper.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      background-color: #000;
+      font-family: 'Orbitron', sans-serif;
+      color: white;
+      padding: 30px;
+      margin: 0;
+      animation: fadeIn 1s ease-in;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    h1 {
+      text-align: center;
+      font-size: 50px;
+      text-shadow: 0 0 25px #fff, 0 0 50px #0ff, 0 0 75px #0ff;
+      animation: glow 1.5s ease-in-out infinite alternate;
+    }
+    @keyframes glow {
+      from { text-shadow: 0 0 5px #fff, 0 0 10px #0ff; }
+      to { text-shadow: 0 0 20px #fff, 0 0 40px #6a82fb; }
+    }
+    label, input, button, select {
+      font-size: 18px;
+      margin: 10px;
+    }
+    input, select {
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #555;
+      font-family: 'Orbitron', sans-serif;
+    }
+    button {
+      padding: 10px 20px;
+      background: #2c2c2c;
+      color: white;
+      border: 1px solid #444;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover { background: #444; }
+    .top-right {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .challenge-list {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      margin-top: 30px;
+    }
+    .challenge-card {
+      display: flex;
+      align-items: center;
+      background-color: rgba(30, 30, 30, 0.9);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(255,255,255,0.1);
+      transition: opacity 0.3s ease;
+      position: relative;
+    }
+    .challenge-image-container {
+      width: 200px;
+      height: 120px;
+      border-radius: 12px;
+      background-color: #333;
+      overflow: hidden;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+    .challenge-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .placeholder-plus {
+      font-size: 48px;
+      color: #888;
+      pointer-events: none;
+    }
+    .remove-image-button {
+      margin-top: 5px;
+      background: #444;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .remove-image-button:hover { background: #666; }
+    .challenge-info {
+      flex-grow: 1;
+      margin-left: 20px;
+      max-width: 300px;
+    }
+    .challenge-info input {
+      background: none;
+      border: none;
+      border-bottom: 1px solid #666;
+      color: #fff;
+      font-size: 18px;
+      margin-top: 5px;
+      width: 100%;
+    }
+    .challenge-controls {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 10px;
+      margin-left: auto;
+    }
+    .punkte-badge {
+      background: linear-gradient(to right, #ffe000, #799f0c);
+      padding: 8px 14px;
+      border-radius: 30px;
+      font-weight: bold;
+      color: #000;
+      font-size: 16px;
+      text-shadow: 1px 1px 2px #fff;
+    }
+    .tags-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+      max-width: 300px;
+    }
+    .badge {
+      background: linear-gradient(90deg, #6a82fb, #fc5c7d);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 15px;
+      font-size: 13px;
+      box-shadow: 0 0 8px #6a82fb;
+      transition: 0.3s;
+    }
+    .badge:hover {
+      background: linear-gradient(90deg, #fc5c7d, #6a82fb);
+      box-shadow: 0 0 15px #fc5c7d;
+      transform: scale(1.05);
+    }
+    #moderatorLogin {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #222;
+      padding: 30px;
+      border-radius: 10px;
+      z-index: 2000;
+      text-align: center;
+    }
+    .moderator-exit {
+      position: absolute;
+      top: 140px;
+      right: 20px;
+      padding: 5px 12px;
+      font-size: 16px;
+      background: #444;
+      color: #fff;
+      border: 1px solid #666;
+      border-radius: 8px;
+      opacity: 0.5;
+      transition: 0.3s;
+      cursor: pointer;
+      display: none;
+    }
+    .moderator-exit:hover {
+      opacity: 1;
+      background: #666;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="top-right">
+  <button onclick="openModeratorLogin()">🛡️ Moderator</button>
+</div>
+
+<button class="moderator-exit" id="moderatorExit" onclick="leaveModeratorMode()">❌ Moderator verlassen</button>
+
+<h1 id="mainTitle">🌒 Eclipse Challenge List</h1>
+
+<div style="margin-top: 20px; margin-bottom: 10px;">
+  <label for="tagFilter">🔎 Filter nach Tag:</label>
+  <select id="tagFilter" onchange="filterChallengesByTag()">
+    <option value="alle">Alle anzeigen</option>
+    <option value="Top 1">Top 1</option>
+    <option value="Top 2-5">Top 2-5</option>
+    <option value="Top 5-10">Top 5-10</option>
+    <option value="Top 10-20">Top 10-20</option>
+    <option value="Top 20-100">Top 20-100</option>
+    <option value="Wave">Wave</option>
+    <option value="Ship">Ship</option>
+    <option value="Cube">Cube</option>
+    <option value="Ball">Ball</option>
+    <option value="Spider">Spider</option>
+    <option value="Ufo">Ufo</option>
+    <option value="Swing">Swing</option>
+    <option value="Dual">Dual</option>
+    <option value="2.2 Effects">2.2 Effects</option>
+    <option value="Corridor">Corridor</option>
+    <option value="Fast Paced">Fast Paced</option>
+    <option value="Slow Paced">Slow Paced</option>
+    <option value="Timings">Timings</option>
+    <option value="Decorated">Decorated</option>
+    <option value="Layout">Layout</option>
+  </select>
+</div>
+
+<label>Maximale Punkte: <input type="number" id="maxPunkte" value="100" disabled></label>
+<label>Faktor: <input type="number" id="faktor" value="1.5" step="0.1" disabled></label>
+<button class="admin-button" onclick="updateTable()">🔄 Aktualisieren</button>
+<button class="admin-button" onclick="addChallenge()">➕ Neue Challenge</button>
+
+<div class="challenge-list" id="challengeCards"></div>
+
+<input type="file" id="fileInput" style="display:none;" accept="image/*" onchange="handleFileUpload(event)">
+
+<div id="moderatorLogin">
+  <h2>Moderator Login</h2>
+  <input type="password" id="moderatorPassword" placeholder="Passwort">
+  <br><br>
+  <button onclick="checkModerator()">✅ Einloggen</button>
+  <button onclick="closeModeratorLogin()">❌ Abbrechen</button>
+</div>
+
+<script>
+  const STORAGE_KEY = "challengeListe";
+  let moderatorMode = false;
+  let challenges = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [
+    { name: "Bosskampf", creator: "Unbekannt", image: "", verifier: "", tags: [] },
+    { name: "Parkour Madness", creator: "Unbekannt", image: "", verifier: "", tags: [] },
+    { name: "Rätselraum", creator: "Unbekannt", image: "", verifier: "", tags: [] },
+    { name: "Speedrun", creator: "Unbekannt", image: "", verifier: "", tags: [] },
+    { name: "Tutorial", creator: "Unbekannt", image: "", verifier: "", tags: [] }
+  ];
+  
+  let currentImageIndex = null;
+  
+  function saveChallenges() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(challenges));
+  }
+  
+  function calculatePoints(rank, total, maxPoints, factor) {
+    return Math.round(maxPoints * Math.pow((total - rank) / total, factor));
+  }
+  
+  function updateTable() {
+    const container = document.getElementById("challengeCards");
+    container.innerHTML = "";
+  
+    const maxPoints = parseFloat(document.getElementById("maxPunkte").value);
+    const factor = parseFloat(document.getElementById("faktor").value);
+    const total = challenges.length;
+  
+    challenges.forEach((challenge, index) => {
+      const points = calculatePoints(index, total, maxPoints, factor);
+  
+      const card = document.createElement("div");
+      card.className = "challenge-card";
+      card.innerHTML = `
+        <div class="challenge-image-container" onclick="${moderatorMode ? `triggerFileInput(${index})` : ``}">
+          ${challenge.image ? `<img src="${challenge.image}" class="challenge-image" />` : `<div class="placeholder-plus">+</div>`}
+        </div>
+        ${moderatorMode ? `<button class="remove-image-button" onclick="removeImage(${index})">🗑️ Bild entfernen</button>` : ""}
+        <div class="challenge-info">
+          <div style="font-size: 20px; margin-bottom: 5px;">#${index + 1}</div>
+          <label>Level Name</label>
+          <input type="text" value="${challenge.name}" onchange="updateName(${index}, this.value, 'name')" ${moderatorMode ? "" : "disabled"}>
+          <label>Ersteller</label>
+          <input type="text" value="${challenge.creator}" onchange="updateName(${index}, this.value, 'creator')" ${moderatorMode ? "" : "disabled"}>
+          <label>Verifier</label>
+          <input type="text" value="${challenge.verifier || ''}" onchange="updateName(${index}, this.value, 'verifier')" ${moderatorMode ? "" : "disabled"}>
+        </div>
+        <div class="challenge-controls" style="align-items: flex-end;">
+          <span class="punkte-badge">${points} ⭐</span>
+          <div class="tags-container">
+            ${challenge.tags.map(tag => `<span class="badge">${tag}</span>`).join('')}
+          </div>
+          ${moderatorMode ? `<button style="margin-top: 10px;" onclick="editTags(${index})">🏷️ Tags bearbeiten</button>` : ""}
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  
+    saveChallenges();
+  }
+  
+  function triggerFileInput(index) {
+    if (!moderatorMode) return;
+    currentImageIndex = index;
+    document.getElementById("fileInput").click();
+  }
+  
+  function handleFileUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      challenges[currentImageIndex].image = e.target.result;
+      updateTable();
+    };
+    reader.readAsDataURL(file);
+  }
+  
+  function removeImage(index) {
+    challenges[index].image = "";
+    updateTable();
+  }
+  
+  function updateName(index, value, field) {
+    challenges[index][field] = value;
+    saveChallenges();
+  }
+  
+  function openModeratorLogin() {
+    document.getElementById('moderatorLogin').style.display = 'block';
+  }
+  
+  function closeModeratorLogin() {
+    document.getElementById('moderatorLogin').style.display = 'none';
+  }
+  
+  function checkModerator() {
+    const password = document.getElementById('moderatorPassword').value;
+    if (password === "1q2w3e4R_") {
+      moderatorMode = true;
+      closeModeratorLogin();
+      document.getElementById('mainTitle').innerText = "🌒 Eclipse Challenge List – Moderator-Modus";
+      document.getElementById('moderatorExit').style.display = "inline-block";
+      document.getElementById('maxPunkte').disabled = false;
+      document.getElementById('faktor').disabled = false;
+      updateTable();
+    } else {
+      alert("Falsches Passwort!");
+    }
+  }
+  
+  function leaveModeratorMode() {
+    if (confirm("Willst du den Moderator-Modus wirklich verlassen?")) {
+      moderatorMode = false;
+      document.getElementById('mainTitle').innerText = "🌒 Eclipse Challenge List";
+      document.getElementById('moderatorExit').style.display = "none";
+      document.getElementById('maxPunkte').disabled = true;
+      document.getElementById('faktor').disabled = true;
+      updateTable();
+    }
+  }
+  
+  function editTags(index) {
+    const selectedTags = prompt("Gib die Tags ein, getrennt mit Komma (z.B. Wave, Cube, Fast Paced):", challenges[index].tags.join(", "));
+    if (selectedTags !== null) {
+      challenges[index].tags = selectedTags.split(",").map(t => t.trim()).filter(t => t.length > 0);
+      updateTable();
+      saveChallenges();
+    }
+  }
+  
+  function filterChallengesByTag() {
+    const selectedTag = document.getElementById("tagFilter").value;
+    const challengeCards = document.querySelectorAll(".challenge-card");
+  
+    challengeCards.forEach((card, index) => {
+      const tags = challenges[index].tags;
+      if (selectedTag === "alle" || tags.includes(selectedTag)) {
+        card.style.display = "flex";
+        card.style.opacity = 0;
+        setTimeout(() => { card.style.opacity = 1; }, 100);
+      } else {
+        card.style.opacity = 0;
+        setTimeout(() => { card.style.display = "none"; }, 300);
+      }
+    });
+  }
+  
+  document.addEventListener("DOMContentLoaded", function() {
+    updateTable();
+  });
+  </script>
+  
+</body>
+</html>
